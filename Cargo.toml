@@ -1,0 +1,9 @@
+[package]
+authors = ["SchweGELBin <schwegelbin@gmail.com>"]
+edition = "2024"
+name = "bible4tui"
+version = "0.0.0"
+
+[dependencies]
+crossterm = "^0.29"
+ratatui = "^0.29"
