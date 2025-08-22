@@ -5,5 +5,5 @@ name = "bible4tui"
 version = "0.0.0"
 
 [dependencies]
-crossterm = "^0.29"
+color-eyre = "^0.6"
 ratatui = "^0.29"
