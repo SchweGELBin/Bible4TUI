@@ -2,7 +2,7 @@
 authors = ["SchweGELBin <schwegelbin@gmail.com>"]
 edition = "2024"
 name = "bible4tui"
-version = "0.0.0"
+version = "0.1.0"
 
 [dependencies]
 color-eyre = "^0.6"
