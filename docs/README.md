@@ -5,6 +5,7 @@
 
 - Bible program for the terminal
 - Available in my [nur expressions](https://github.com/SchweGELBin/nur-expressions) repo
+- This program is very experimental and should not be used in the current state
 
 ## Build
 
