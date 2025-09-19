@@ -1,9 +1,22 @@
 use std::error::Error;
-use std::{env, fs, time, u8};
+use std::{collections::HashMap, env, fs, time, u8};
+
+#[derive(serde::Deserialize)]
+struct Bible {
+    books: Vec<Book>,
+    translation: String,
+}
+
+#[derive(serde::Deserialize)]
+struct Book {
+    chapters: Vec<Chapter>,
+    name: String,
+}
 
 #[derive(serde::Deserialize)]
 struct Chapter {
     name: String,
+    verses: Vec<Verse>,
 }
 
 #[derive(serde::Deserialize)]
@@ -14,7 +27,19 @@ struct Selection {
 }
 
 #[derive(serde::Deserialize)]
+struct Translation {
+    abbreviation: String,
+    distribution_about: String,
+    distribution_license: String,
+    lang: String,
+    language: String,
+    sha: String,
+    translation: String,
+}
+
+#[derive(serde::Deserialize)]
 struct Verse {
+    name: String,
     verse: usize,
     text: String,
 }
@@ -125,13 +150,29 @@ pub fn get_chapter(
     chapter: usize,
 ) -> Result<String, Box<dyn Error>> {
     let mut text = String::new();
-    let file: String = fs::read_to_string(format!("{}/{}.json", get_data_dir(), translation))?;
+    let file = fs::read_to_string(format!("{}/{}.json", get_data_dir(), translation))?;
     let json: serde_json::Value = serde_json::from_str(&file)?;
     let verses: Vec<Verse> =
         serde_json::from_value(json["books"][book]["chapters"][chapter]["verses"].clone())?;
-    println!("{}", json["books"][book]["chapters"][chapter]["name"]);
+    let name: String =
+        serde_json::from_value(json["books"][book]["chapters"][chapter]["name"].clone())?;
+    text.push_str(format!("{}\n", &name).as_str());
     for verse in verses {
         text.push_str(format!("{} {}\n", verse.verse, verse.text).as_str());
     }
     Ok(text)
+}
+
+pub fn get_translation_list() -> Result<String, Box<dyn Error>> {
+    let mut text = String::new();
+    let translations = get_translations().unwrap();
+    for item in translations {
+        text.push_str(format!("{}\n", &item.1.abbreviation).as_str());
+    }
+    Ok(text)
+}
+fn get_translations() -> Result<HashMap<String, Translation>, Box<dyn Error>> {
+    let file = fs::read_to_string(format!("{}/translations.json", get_data_dir()))?;
+    let map: HashMap<String, Translation> = serde_json::from_str(&file)?;
+    Ok(map)
 }

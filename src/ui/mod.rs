@@ -15,7 +15,12 @@ pub fn draw(frame: &mut Frame) {
             Constraint::Percentage(24),
         ])
         .split(frame.area());
-    render_block(frame, layout[0], "Translation", &Paragraph::new("Test"));
+    render_block(
+        frame,
+        layout[0],
+        "Translation",
+        &Paragraph::new(get_translation_list()),
+    );
     render_block(frame, layout[1], "Book", &Paragraph::new("Test"));
     render_block(frame, layout[2], "Chapter", &Paragraph::new("Test"));
     render_block(
@@ -38,4 +43,8 @@ fn render_block(frame: &mut Frame, area: Rect, title: &str, paragraph: &Paragrap
 fn get_read_text() -> String {
     let selection = crate::logic::get_selection().unwrap();
     crate::logic::get_chapter(&selection.0, selection.1, selection.2).unwrap()
+}
+
+fn get_translation_list() -> String {
+    crate::logic::get_translation_list().unwrap()
 }
