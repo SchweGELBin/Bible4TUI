@@ -15,6 +15,6 @@ rustPlatform.buildRustPackage (finalAttrs: {
     changelog = "https://github.com/SchweGELBin/Bible4TUI/blob/v${finalAttrs.version}/docs/CHANGELOG.md";
     license = lib.licenses.mit;
     mainProgram = finalAttrs.pname;
-    maintainers = with lib.maintainers; [ SchweGELBin ];
+    maintainers = [ lib.maintainers.SchweGELBin ];
   };
 })
