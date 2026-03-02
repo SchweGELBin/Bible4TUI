@@ -1,5 +1,5 @@
-use std::error::Error;
-use std::{collections::HashMap, env, fs, time, u8};
+use indexmap::IndexMap;
+use std::{env, error::Error, fs, time, u8};
 
 #[derive(serde::Deserialize)]
 struct Bible {
@@ -171,8 +171,8 @@ pub fn get_translation_list() -> Result<String, Box<dyn Error>> {
     }
     Ok(text)
 }
-fn get_translations() -> Result<HashMap<String, Translation>, Box<dyn Error>> {
+fn get_translations() -> Result<IndexMap<String, Translation>, Box<dyn Error>> {
     let file = fs::read_to_string(format!("{}/translations.json", get_data_dir()))?;
-    let map: HashMap<String, Translation> = serde_json::from_str(&file)?;
+    let map: IndexMap<String, Translation> = serde_json::from_str(&file)?;
     Ok(map)
 }

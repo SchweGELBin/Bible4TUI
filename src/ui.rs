@@ -4,7 +4,7 @@ use ratatui::{
     Frame,
 };
 
-pub fn draw(frame: &mut Frame) {
+pub fn draw(frame: &mut Frame, app: &crate::App) {
     let layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(vec![
@@ -19,7 +19,7 @@ pub fn draw(frame: &mut Frame) {
         frame,
         layout[0],
         "Translation",
-        &Paragraph::new(get_translation_list()),
+        &Paragraph::new(&*app.col_translation),
     );
     render_block(frame, layout[1], "Book", &Paragraph::new("Test"));
     render_block(frame, layout[2], "Chapter", &Paragraph::new("Test"));
@@ -27,7 +27,7 @@ pub fn draw(frame: &mut Frame) {
         frame,
         layout[3],
         "Read",
-        &Paragraph::new(get_read_text()).wrap(Wrap { trim: true }),
+        &Paragraph::new(&*app.col_read).wrap(Wrap { trim: true }),
     );
     render_block(frame, layout[4], "Search", &Paragraph::new("Test"));
 }
@@ -38,13 +38,4 @@ fn render_block(frame: &mut Frame, area: Rect, title: &str, paragraph: &Paragrap
         .border_type(BorderType::Rounded)
         .title(title);
     frame.render_widget(paragraph.clone().block(block), area);
-}
-
-fn get_read_text() -> String {
-    let selection = crate::logic::get_selection().unwrap();
-    crate::logic::get_chapter(&selection.0, selection.1, selection.2).unwrap()
-}
-
-fn get_translation_list() -> String {
-    crate::logic::get_translation_list().unwrap()
 }

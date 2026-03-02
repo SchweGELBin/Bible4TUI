@@ -118,6 +118,7 @@ name = "bible4tui"
 version = "0.2.0"
 dependencies = [
  "color-eyre",
+ "indexmap",
  "ratatui",
  "reqwest",
  "serde",

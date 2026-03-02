@@ -18,17 +18,29 @@ fn main() -> Result<()> {
 #[derive(Debug, Default)]
 pub struct App {
     running: bool,
+    selection: (String, usize, usize),
+    col_read: String,
+    col_translation: String,
 }
 
 impl App {
     pub fn new() -> Self {
-        Self::default()
+        let running = true;
+        let selection = logic::get_selection().unwrap();
+        let col_read = logic::get_chapter(&selection.0, selection.1, selection.2).unwrap();
+        let col_translation = logic::get_translation_list().unwrap();
+        Self {
+            running,
+            selection,
+            col_read,
+            col_translation,
+        }
     }
 
     pub fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
         self.running = true;
         while self.running {
-            terminal.draw(ui::draw)?;
+            terminal.draw(|frame| ui::draw(frame, &self))?;
             self.handle_crossterm_events()?;
         }
         Ok(())
@@ -48,7 +60,6 @@ impl App {
         match (key.modifiers, key.code) {
             (_, KeyCode::Esc | KeyCode::Char('q'))
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
-            // Add other key handlers here.
             _ => {}
         }
     }
