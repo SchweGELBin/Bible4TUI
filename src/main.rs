@@ -28,6 +28,7 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         let running = true;
+        let _ = logic::initialize();
         let selection = logic::get_selection().unwrap();
         let col_book = logic::get_book_list(&selection.0).unwrap();
         let col_chapter = logic::get_chapter_list(&selection.0, selection.1).unwrap();

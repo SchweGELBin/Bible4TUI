@@ -45,7 +45,9 @@ struct Verse {
 }
 
 pub fn initialize() -> Result<(), Box<dyn Error>> {
-    let index = format!("{}/translations.json", get_data_dir());
+    let dir = get_data_dir();
+    fs::create_dir_all(&dir)?;
+    let index = format!("{}/translations.json", &dir);
     if !fs::exists(&index)?
         || fs::metadata(&index)
             .unwrap()
