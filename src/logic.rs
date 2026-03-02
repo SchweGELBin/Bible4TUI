@@ -163,6 +163,33 @@ pub fn get_chapter(
     Ok(text)
 }
 
+pub fn get_book_list(translation: &str) -> Result<String, Box<dyn Error>> {
+    let mut text = String::new();
+    let file = fs::read_to_string(format!("{}/{}.json", get_data_dir(), translation))?;
+    let json: serde_json::Value = serde_json::from_str(&file)?;
+    let books: Vec<Book> = serde_json::from_value(json["books"].clone())?;
+    for i in 1..books.len() + 1 {
+        text.push_str(format!("{} ", i).as_str());
+        if i % 3 == 0 {
+            text.push_str("\n")
+        };
+    }
+    Ok(text)
+}
+pub fn get_chapter_list(translation: &str, book: usize) -> Result<String, Box<dyn Error>> {
+    let mut text = String::new();
+    let file = fs::read_to_string(format!("{}/{}.json", get_data_dir(), translation))?;
+    let json: serde_json::Value = serde_json::from_str(&file)?;
+    let chapters: Vec<Chapter> = serde_json::from_value(json["books"][book]["chapters"].clone())?;
+    for i in 1..chapters.len() + 1 {
+        text.push_str(format!("{} ", i).as_str());
+        if i % 3 == 0 {
+            text.push_str("\n")
+        };
+    }
+    Ok(text)
+}
+
 pub fn get_translation_list() -> Result<String, Box<dyn Error>> {
     let mut text = String::new();
     let translations = get_translations().unwrap();

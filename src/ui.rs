@@ -21,8 +21,13 @@ pub fn draw(frame: &mut Frame, app: &crate::App) {
         "Translation",
         &Paragraph::new(&*app.col_translation),
     );
-    render_block(frame, layout[1], "Book", &Paragraph::new("Test"));
-    render_block(frame, layout[2], "Chapter", &Paragraph::new("Test"));
+    render_block(frame, layout[1], "Book", &Paragraph::new(&*app.col_book));
+    render_block(
+        frame,
+        layout[2],
+        "Chapter",
+        &Paragraph::new(&*app.col_chapter),
+    );
     render_block(
         frame,
         layout[3],

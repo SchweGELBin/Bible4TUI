@@ -19,6 +19,8 @@ fn main() -> Result<()> {
 pub struct App {
     running: bool,
     selection: (String, usize, usize),
+    col_book: String,
+    col_chapter: String,
     col_read: String,
     col_translation: String,
 }
@@ -27,11 +29,15 @@ impl App {
     pub fn new() -> Self {
         let running = true;
         let selection = logic::get_selection().unwrap();
+        let col_book = logic::get_book_list(&selection.0).unwrap();
+        let col_chapter = logic::get_chapter_list(&selection.0, selection.1).unwrap();
         let col_read = logic::get_chapter(&selection.0, selection.1, selection.2).unwrap();
         let col_translation = logic::get_translation_list().unwrap();
         Self {
             running,
             selection,
+            col_book,
+            col_chapter,
             col_read,
             col_translation,
         }
