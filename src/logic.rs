@@ -11,6 +11,7 @@ struct Bible {
 struct Book {
     chapters: Vec<Chapter>,
     name: String,
+    nr: usize,
 }
 
 #[derive(serde::Deserialize)]
@@ -178,9 +179,6 @@ pub fn get_chapter(
     let json: serde_json::Value = serde_json::from_str(&file)?;
     let verses: Vec<Verse> =
         serde_json::from_value(json["books"][book]["chapters"][chapter]["verses"].clone())?;
-    let name: String =
-        serde_json::from_value(json["books"][book]["chapters"][chapter]["name"].clone())?;
-    text.push_str(format!("{}\n", &name).as_str());
     for verse in verses {
         text.push_str(format!("{} {}\n", verse.verse, verse.text).as_str());
     }
@@ -204,40 +202,62 @@ pub fn get_count(
     Ok((books.len(), chapter_count))
 }
 
-pub fn get_book_list(translation: &str) -> Result<String, Box<dyn Error>> {
+pub fn get_book_list(translation: &str, selected: usize) -> Result<String, Box<dyn Error>> {
     let mut text = String::new();
-    let count = get_count(translation, None).unwrap();
-    for i in 1..count.0 + 1 {
-        text.push_str(format!("{} ", i).as_str());
-        if i % 3 == 0 {
-            text.push_str("\n")
-        };
+    let file = fs::read_to_string(format!("{}/{}.json", get_data_dir(), translation))?;
+    let json: serde_json::Value = serde_json::from_str(&file)?;
+    let books: Vec<Book> = serde_json::from_value(json["books"].clone())?;
+    for book in books {
+        text.push_str(
+            format!(
+                "{}{}\n",
+                if book.nr - 1 == selected { ">" } else { "" },
+                &book.name
+            )
+            .as_str(),
+        );
     }
     Ok(text)
 }
 
-pub fn get_chapter_list(translation: &str, book: usize) -> Result<String, Box<dyn Error>> {
+pub fn get_chapter_list(
+    translation: &str,
+    book: usize,
+    selected: usize,
+) -> Result<String, Box<dyn Error>> {
     let mut text = String::new();
     let count = get_count(translation, Some(book)).unwrap();
     for i in 1..count.1.unwrap() + 1 {
-        text.push_str(format!("{} ", i).as_str());
+        if i - 1 == selected {
+            text.push_str(format!(">{:>3}  ", i).as_str());
+        } else {
+            text.push_str(format!("{:>4}  ", i).as_str());
+        }
         if i % 3 == 0 {
+            text = text.trim_end().to_string();
             text.push_str("\n")
         };
     }
     Ok(text)
 }
 
-pub fn get_translation_list() -> Result<String, Box<dyn Error>> {
+pub fn get_translation_list(selected: &str) -> Result<String, Box<dyn Error>> {
     let mut text = String::new();
-    let translations = get_translations().unwrap();
+    let file = fs::read_to_string(format!("{}/translations.json", get_data_dir()))?;
+    let translations: IndexMap<String, Translation> = serde_json::from_str(&file)?;
     for item in translations {
-        text.push_str(format!("{}\n", &item.1.abbreviation).as_str());
+        text.push_str(
+            format!(
+                "{}{}\n",
+                if item.1.abbreviation == selected {
+                    ">"
+                } else {
+                    ""
+                },
+                &item.1.abbreviation
+            )
+            .as_str(),
+        );
     }
     Ok(text)
-}
-fn get_translations() -> Result<IndexMap<String, Translation>, Box<dyn Error>> {
-    let file = fs::read_to_string(format!("{}/translations.json", get_data_dir()))?;
-    let map: IndexMap<String, Translation> = serde_json::from_str(&file)?;
-    Ok(map)
 }

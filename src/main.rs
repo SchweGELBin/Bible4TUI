@@ -86,9 +86,9 @@ impl App {
         book: usize,
         chapter: usize,
     ) -> Result<(String, String, String, String)> {
-        let col_translation = logic::get_translation_list().unwrap();
-        let col_book = logic::get_book_list(&translation).unwrap();
-        let col_chapter = logic::get_chapter_list(&translation, book).unwrap();
+        let col_translation = logic::get_translation_list(translation).unwrap();
+        let col_book = logic::get_book_list(&translation, book).unwrap();
+        let col_chapter = logic::get_chapter_list(&translation, book, chapter).unwrap();
         let col_read = logic::get_chapter(&translation, book, chapter).unwrap();
         Ok((col_translation, col_book, col_chapter, col_read))
     }
