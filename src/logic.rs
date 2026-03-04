@@ -60,7 +60,7 @@ pub fn initialize() -> Result<(), Box<dyn Error>> {
     {
         let _ = save_index();
     }
-    let _ = save_selection(&None, &None, &None);
+    let _ = save_selection(None, None, None);
     let selection = get_selection().unwrap();
     if !fs::exists(format!("{}/{}.json", get_data_dir(), &selection.0))? {
         let _ = download_file(&selection.0);
@@ -68,34 +68,56 @@ pub fn initialize() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn save_selection(
-    translation: &Option<&str>,
-    book: &Option<usize>,
-    chapter: &Option<usize>,
+pub fn save_selection(
+    translation: Option<&str>,
+    book: Option<usize>,
+    chapter: Option<usize>,
 ) -> Result<(), Box<dyn Error>> {
     let file = format!("{}/selection.json", get_data_dir());
-    let mut data = serde_json::json!({
-        "translation": "schlachter",
-        "book": 0,
-        "chapter": 0
+    let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
+    let new_translation: &str = translation.unwrap_or(&previous.0);
+    let new_book: usize = book.unwrap_or(previous.1);
+    let new_chapter: usize = chapter.unwrap_or(previous.2);
+    let data = serde_json::json!({
+        "translation": new_translation,
+        "book": new_book,
+        "chapter": new_chapter
     });
-    if fs::exists(&file)? {
-        data = serde_json::from_str(&file)?;
-        fs::remove_file(&file)?;
-    }
-    if translation.is_some() {
-        let value: serde_json::Value = serde_json::from_str(&translation.unwrap()).unwrap();
-        data["translation"] = value;
-    }
-    if book.is_some() {
-        let value: serde_json::Value = book.unwrap().into();
-        data["book"] = value;
-    }
-    if chapter.is_some() {
-        let value: serde_json::Value = chapter.unwrap().into();
-        data["chapter"] = value;
-    }
     fs::write(&file, data.to_string())?;
+    Ok(())
+}
+
+pub fn turn_chapter(direction: bool) -> Result<(), Box<dyn Error>> {
+    let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
+    let count = get_count(&previous.0, Some(previous.1)).unwrap_or((1, Some(1)));
+    let new_selection = if !direction && previous.2 <= 0 {
+        let new_book: usize = (previous.1 as isize - 1)
+            .clamp(0, (count.0 - 1) as isize)
+            .try_into()
+            .unwrap();
+        let new_chapter = if previous.1 == 0 {
+            0
+        } else {
+            let count = get_count(&previous.0, Some(new_book)).unwrap_or((1, Some(1)));
+            count.1.unwrap() - 1
+        };
+        (new_book, new_chapter)
+    } else if direction && previous.2 >= count.1.unwrap() - 1 {
+        let new_book = (previous.1 + 1).clamp(0, count.0 - 1);
+        let new_chapter = if previous.1 >= count.0 - 1 {
+            previous.2
+        } else {
+            0
+        };
+        (new_book, new_chapter)
+    } else {
+        if direction {
+            (previous.1, previous.2 + 1)
+        } else {
+            (previous.1, previous.2 - 1)
+        }
+    };
+    save_selection(None, Some(new_selection.0), Some(new_selection.1))?;
     Ok(())
 }
 
@@ -165,12 +187,27 @@ pub fn get_chapter(
     Ok(text)
 }
 
-pub fn get_book_list(translation: &str) -> Result<String, Box<dyn Error>> {
-    let mut text = String::new();
+pub fn get_count(
+    translation: &str,
+    book: Option<usize>,
+) -> Result<(usize, Option<usize>), Box<dyn Error>> {
     let file = fs::read_to_string(format!("{}/{}.json", get_data_dir(), translation))?;
     let json: serde_json::Value = serde_json::from_str(&file)?;
     let books: Vec<Book> = serde_json::from_value(json["books"].clone())?;
-    for i in 1..books.len() + 1 {
+    let chapter_count = if book.is_some() {
+        let chapters: Vec<Chapter> =
+            serde_json::from_value(json["books"][book.unwrap()]["chapters"].clone())?;
+        Some(chapters.len())
+    } else {
+        None
+    };
+    Ok((books.len(), chapter_count))
+}
+
+pub fn get_book_list(translation: &str) -> Result<String, Box<dyn Error>> {
+    let mut text = String::new();
+    let count = get_count(translation, None).unwrap();
+    for i in 1..count.0 + 1 {
         text.push_str(format!("{} ", i).as_str());
         if i % 3 == 0 {
             text.push_str("\n")
@@ -178,12 +215,11 @@ pub fn get_book_list(translation: &str) -> Result<String, Box<dyn Error>> {
     }
     Ok(text)
 }
+
 pub fn get_chapter_list(translation: &str, book: usize) -> Result<String, Box<dyn Error>> {
     let mut text = String::new();
-    let file = fs::read_to_string(format!("{}/{}.json", get_data_dir(), translation))?;
-    let json: serde_json::Value = serde_json::from_str(&file)?;
-    let chapters: Vec<Chapter> = serde_json::from_value(json["books"][book]["chapters"].clone())?;
-    for i in 1..chapters.len() + 1 {
+    let count = get_count(translation, Some(book)).unwrap();
+    for i in 1..count.1.unwrap() + 1 {
         text.push_str(format!("{} ", i).as_str());
         if i % 3 == 0 {
             text.push_str("\n")

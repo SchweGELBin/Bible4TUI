@@ -19,20 +19,20 @@ pub fn draw(frame: &mut Frame, app: &crate::App) {
         frame,
         layout[0],
         "Translation",
-        &Paragraph::new(&*app.col_translation),
+        &Paragraph::new(&*app.columns.0),
     );
-    render_block(frame, layout[1], "Book", &Paragraph::new(&*app.col_book));
+    render_block(frame, layout[1], "Book", &Paragraph::new(&*app.columns.1));
     render_block(
         frame,
         layout[2],
         "Chapter",
-        &Paragraph::new(&*app.col_chapter),
+        &Paragraph::new(&*app.columns.2),
     );
     render_block(
         frame,
         layout[3],
         "Read",
-        &Paragraph::new(&*app.col_read).wrap(Wrap { trim: true }),
+        &Paragraph::new(&*app.columns.3).wrap(Wrap { trim: true }),
     );
     render_block(frame, layout[4], "Search", &Paragraph::new("Test"));
 }

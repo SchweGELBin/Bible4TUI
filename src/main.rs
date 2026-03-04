@@ -19,10 +19,7 @@ fn main() -> Result<()> {
 pub struct App {
     running: bool,
     selection: (String, usize, usize),
-    col_book: String,
-    col_chapter: String,
-    col_read: String,
-    col_translation: String,
+    columns: (String, String, String, String),
 }
 
 impl App {
@@ -30,17 +27,11 @@ impl App {
         let running = true;
         let _ = logic::initialize();
         let selection = logic::get_selection().unwrap();
-        let col_book = logic::get_book_list(&selection.0).unwrap();
-        let col_chapter = logic::get_chapter_list(&selection.0, selection.1).unwrap();
-        let col_read = logic::get_chapter(&selection.0, selection.1, selection.2).unwrap();
-        let col_translation = logic::get_translation_list().unwrap();
+        let columns = App::get_columns(&selection.0, selection.1, selection.2).unwrap();
         Self {
             running,
             selection,
-            col_book,
-            col_chapter,
-            col_read,
-            col_translation,
+            columns,
         }
     }
 
@@ -67,11 +58,38 @@ impl App {
         match (key.modifiers, key.code) {
             (_, KeyCode::Esc | KeyCode::Char('q'))
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
+            (_, KeyCode::Left) => {
+                let _ = logic::turn_chapter(false);
+                let selection = logic::get_selection().unwrap();
+                self.update(&selection.0, selection.1, selection.2);
+            }
+            (_, KeyCode::Right) => {
+                let _ = logic::turn_chapter(true);
+                let selection = logic::get_selection().unwrap();
+                self.update(&selection.0, selection.1, selection.2);
+            }
             _ => {}
         }
     }
 
     fn quit(&mut self) {
         self.running = false;
+    }
+
+    fn update(&mut self, translation: &str, book: usize, chapter: usize) {
+        self.selection = (translation.to_string(), book, chapter);
+        self.columns = App::get_columns(translation, book, chapter).unwrap();
+    }
+
+    fn get_columns(
+        translation: &str,
+        book: usize,
+        chapter: usize,
+    ) -> Result<(String, String, String, String)> {
+        let col_translation = logic::get_translation_list().unwrap();
+        let col_book = logic::get_book_list(&translation).unwrap();
+        let col_chapter = logic::get_chapter_list(&translation, book).unwrap();
+        let col_read = logic::get_chapter(&translation, book, chapter).unwrap();
+        Ok((col_translation, col_book, col_chapter, col_read))
     }
 }
