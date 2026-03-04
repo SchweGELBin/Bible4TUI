@@ -1,3 +1,14 @@
+## [0.4.0] - 2026-03-04
+
+### 🚀 Features
+
+- Turn chapters via arrow keys
+- Mark selection in columns
+- Turn book via arrow keys
+
+### ⚙️ Miscellaneous Tasks
+
+- Add missing keybinds as todos
 ## [0.3.0] - 2026-03-02
 
 ### 🚀 Features
@@ -21,6 +32,10 @@
 ### 🎨 Styling
 
 - *(nix)* Cleanup default.nix
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump to 0.3.0
 ## [0.2.0] - 2025-09-19
 
 ### 🚀 Features

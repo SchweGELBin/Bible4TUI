@@ -2,7 +2,7 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "bible4tui";
-  version = "0.3.0";
+  version = "0.4.0";
 
   src = ./.;
   cargoLock.lockFile = ./Cargo.lock;
