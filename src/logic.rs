@@ -122,6 +122,26 @@ pub fn turn_chapter(direction: bool) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+pub fn turn_book(direction: bool) -> Result<(), Box<dyn Error>> {
+    let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
+    let count = get_count(&previous.0, Some(previous.1)).unwrap_or((1, Some(1)));
+    let new_book = if !direction && previous.1 <= 0 {
+        0
+    } else if direction && previous.1 >= count.0 - 1 {
+        previous.1
+    } else {
+        if direction {
+            previous.1 + 1
+        } else {
+            previous.1 - 1
+        }
+    };
+    let new_count = get_count(&previous.0, Some(new_book)).unwrap_or((1, Some(1)));
+    let new_chapter = previous.2.clamp(0, new_count.1.unwrap() - 1);
+    save_selection(None, Some(new_book), Some(new_chapter))?;
+    Ok(())
+}
+
 pub fn get_selection() -> Result<(String, usize, usize), Box<dyn Error>> {
     let file = fs::read_to_string(format!("{}/selection.json", get_data_dir()))?;
     let data: Selection = serde_json::from_str(&file)?;

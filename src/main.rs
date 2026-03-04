@@ -68,6 +68,16 @@ impl App {
                 let selection = logic::get_selection().unwrap();
                 self.update(&selection.0, selection.1, selection.2);
             }
+            (_, KeyCode::Up) => {
+                let _ = logic::turn_book(false);
+                let selection = logic::get_selection().unwrap();
+                self.update(&selection.0, selection.1, selection.2);
+            }
+            (_, KeyCode::Down) => {
+                let _ = logic::turn_book(true);
+                let selection = logic::get_selection().unwrap();
+                self.update(&selection.0, selection.1, selection.2);
+            }
             _ => {}
         }
     }
