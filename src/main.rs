@@ -59,12 +59,22 @@ impl App {
             (_, KeyCode::Esc | KeyCode::Char('q'))
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
             (_, KeyCode::Left) => {
-                let _ = logic::turn_chapter(false);
+                let amount = if key.modifiers == KeyModifiers::SHIFT {
+                    Some(3)
+                } else {
+                    None
+                };
+                let _ = logic::turn_chapter(false, amount);
                 let selection = logic::get_selection().unwrap();
                 self.update(&selection.0, selection.1, selection.2);
             }
             (_, KeyCode::Right) => {
-                let _ = logic::turn_chapter(true);
+                let amount = if key.modifiers == KeyModifiers::SHIFT {
+                    Some(3)
+                } else {
+                    None
+                };
+                let _ = logic::turn_chapter(true, amount);
                 let selection = logic::get_selection().unwrap();
                 self.update(&selection.0, selection.1, selection.2);
             }
@@ -81,7 +91,6 @@ impl App {
             // Use / for search
             // Use ? for help
             // Use Shift + Up/Down to turn translations
-            // Use Shift + Left/Right to turn 3 chapters
             _ => {}
         }
     }

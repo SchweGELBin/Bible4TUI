@@ -88,10 +88,11 @@ pub fn save_selection(
     Ok(())
 }
 
-pub fn turn_chapter(direction: bool) -> Result<(), Box<dyn Error>> {
+pub fn turn_chapter(direction: bool, amount: Option<usize>) -> Result<(), Box<dyn Error>> {
     let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
     let count = get_count(&previous.0, Some(previous.1)).unwrap_or((1, Some(1)));
-    let new_selection = if !direction && previous.2 <= 0 {
+    let amount = amount.unwrap_or(1);
+    let new_selection = if !direction && previous.2 < amount {
         let new_book: usize = (previous.1 as isize - 1)
             .clamp(0, (count.0 - 1) as isize)
             .try_into()
@@ -100,22 +101,22 @@ pub fn turn_chapter(direction: bool) -> Result<(), Box<dyn Error>> {
             0
         } else {
             let count = get_count(&previous.0, Some(new_book)).unwrap_or((1, Some(1)));
-            count.1.unwrap() - 1
+            previous.2 + count.1.unwrap() - amount
         };
         (new_book, new_chapter)
-    } else if direction && previous.2 >= count.1.unwrap() - 1 {
+    } else if direction && previous.2 >= count.1.unwrap() - amount {
         let new_book = (previous.1 + 1).clamp(0, count.0 - 1);
         let new_chapter = if previous.1 >= count.0 - 1 {
             previous.2
         } else {
-            0
+            amount + previous.2 - count.1.unwrap()
         };
         (new_book, new_chapter)
     } else {
         if direction {
-            (previous.1, previous.2 + 1)
+            (previous.1, previous.2 + amount)
         } else {
-            (previous.1, previous.2 - 1)
+            (previous.1, previous.2 - amount)
         }
     };
     save_selection(None, Some(new_selection.0), Some(new_selection.1))?;
