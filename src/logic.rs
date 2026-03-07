@@ -59,14 +59,11 @@ pub fn initialize() -> Result<(), Box<dyn Error>> {
             .as_secs()
             > 86400
     {
-        let _ = save_index();
+        save_index()?;
     }
-    let _ = save_selection(None, None, None);
+    save_selection(None, None, None)?;
     let selection = get_selection().unwrap();
-    if !fs::exists(format!("{}/{}.json", get_data_dir(), &selection.0))? {
-        let _ = download_file(&selection.0);
-    }
-    Ok(())
+    download_file(&selection.0, false)
 }
 
 pub fn save_selection(
@@ -119,8 +116,7 @@ pub fn turn_chapter(direction: bool, amount: Option<usize>) -> Result<(), Box<dy
             (previous.1, previous.2 - amount)
         }
     };
-    save_selection(None, Some(new_selection.0), Some(new_selection.1))?;
-    Ok(())
+    save_selection(None, Some(new_selection.0), Some(new_selection.1))
 }
 
 pub fn turn_book(direction: bool) -> Result<(), Box<dyn Error>> {
@@ -139,8 +135,31 @@ pub fn turn_book(direction: bool) -> Result<(), Box<dyn Error>> {
     };
     let new_count = get_count(&previous.0, Some(new_book)).unwrap_or((1, Some(1)));
     let new_chapter = previous.2.clamp(0, new_count.1.unwrap() - 1);
-    save_selection(None, Some(new_book), Some(new_chapter))?;
-    Ok(())
+    save_selection(None, Some(new_book), Some(new_chapter))
+}
+
+pub fn turn_translation(direction: bool) -> Result<(), Box<dyn Error>> {
+    let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
+    let translations = get_translation_map().unwrap();
+    let index = translations
+        .iter()
+        .position(|item| item.1.abbreviation == previous.0)
+        .unwrap_or(0);
+    let new_index = if direction {
+        index + 1
+    } else {
+        (index as isize - 1) as usize
+    }
+    .clamp(0, translations.len() - 1);
+    let new_translation = translations.get_index(new_index).unwrap().0;
+    download_file(new_translation, false)?;
+    let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
+    let count = get_count(new_translation, Some(previous.1)).unwrap_or((1, Some(1)));
+    save_selection(
+        Some(new_translation),
+        Some(previous.1.clamp(0, count.0 - 1)),
+        Some(previous.2.clamp(0, count.1.unwrap() - 1)),
+    )
 }
 
 pub fn get_selection() -> Result<(String, usize, usize), Box<dyn Error>> {
@@ -157,14 +176,15 @@ fn get_data_dir() -> String {
 }
 
 fn save_index() -> Result<(), Box<dyn Error>> {
-    let _ = download_file("translations");
-    Ok(())
+    download_file("translations", true)
 }
 
-fn download_file(abbrev: &str) -> Result<(), Box<dyn Error>> {
-    let turl = format!("https://api.getbible.net/v2/{}.json", &abbrev);
-    let translation = reqwest::blocking::get(turl)?.bytes()?;
-    fs::write(format!("{}/{}.json", get_data_dir(), &abbrev), &translation)?;
+fn download_file(abbrev: &str, force: bool) -> Result<(), Box<dyn Error>> {
+    if force || !fs::exists(format!("{}/{}.json", get_data_dir(), &abbrev))? {
+        let turl = format!("https://api.getbible.net/v2/{}.json", &abbrev);
+        let translation = reqwest::blocking::get(turl)?.bytes()?;
+        fs::write(format!("{}/{}.json", get_data_dir(), &abbrev), &translation)?;
+    }
     Ok(())
 }
 
@@ -264,8 +284,7 @@ pub fn get_chapter_list(
 
 pub fn get_translation_list(selected: &str) -> Result<String, Box<dyn Error>> {
     let mut text = String::new();
-    let file = fs::read_to_string(format!("{}/translations.json", get_data_dir()))?;
-    let translations: IndexMap<String, Translation> = serde_json::from_str(&file)?;
+    let translations = get_translation_map().unwrap();
     for item in translations {
         text.push_str(
             format!(
@@ -281,4 +300,10 @@ pub fn get_translation_list(selected: &str) -> Result<String, Box<dyn Error>> {
         );
     }
     Ok(text)
+}
+
+fn get_translation_map() -> Result<IndexMap<String, Translation>, Box<dyn Error>> {
+    let file = fs::read_to_string(format!("{}/translations.json", get_data_dir()))?;
+    let translations: IndexMap<String, Translation> = serde_json::from_str(&file)?;
+    Ok(translations)
 }

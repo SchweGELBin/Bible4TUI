@@ -79,18 +79,25 @@ impl App {
                 self.update(&selection.0, selection.1, selection.2);
             }
             (_, KeyCode::Up) => {
-                let _ = logic::turn_book(false);
+                let _ = if key.modifiers == KeyModifiers::SHIFT {
+                    logic::turn_translation(false)
+                } else {
+                    logic::turn_book(false)
+                };
                 let selection = logic::get_selection().unwrap();
                 self.update(&selection.0, selection.1, selection.2);
             }
             (_, KeyCode::Down) => {
-                let _ = logic::turn_book(true);
+                let _ = if key.modifiers == KeyModifiers::SHIFT {
+                    logic::turn_translation(true)
+                } else {
+                    logic::turn_book(true)
+                };
                 let selection = logic::get_selection().unwrap();
                 self.update(&selection.0, selection.1, selection.2);
             }
             // Use / for search
             // Use ? for help
-            // Use Shift + Up/Down to turn translations
             _ => {}
         }
     }
