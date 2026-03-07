@@ -1,3 +1,13 @@
+## [0.5.0] - 2026-03-07
+
+### 🚀 Features
+
+- Turn 3 chapters with Shift + Right/Left
+- Turn translations with Shift + Up/Down
+
+### 📚 Documentation
+
+- Add TODO.md
 ## [0.4.0] - 2026-03-04
 
 ### 🚀 Features
@@ -9,6 +19,7 @@
 ### ⚙️ Miscellaneous Tasks
 
 - Add missing keybinds as todos
+- Bump to 0.4.0
 ## [0.3.0] - 2026-03-02
 
 ### 🚀 Features
