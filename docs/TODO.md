@@ -1,0 +1,19 @@
+- Add Help to Layout
+    - Show Keybinds
+    - Show Author
+    - Link to Repo
+    - Link to getBible
+    - As a new Box at the bottom of Read
+- Implement Search
+    - Open Mode with "/"
+    - Block other Keybinds until exit
+    - Iterate with Arrow keys
+    - Exit with "Esc"
+- Verify files with checksums
+- (Automatically) Update outdated translations
+- Remove unused Serialization
+- (Automatically) Scroll Boxes to Selection
+- Highlight selection with colors
+- Improve Performance
+    - Cache whole translation
+    - ...
