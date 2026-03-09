@@ -72,7 +72,7 @@ pub fn save_selection(
     chapter: Option<usize>,
 ) -> Result<(), Box<dyn Error>> {
     let file = format!("{}/selection.json", get_data_dir());
-    let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
+    let previous = get_selection().unwrap_or(default_selection());
     let new_translation: &str = translation.unwrap_or(&previous.0);
     let new_book: usize = book.unwrap_or(previous.1);
     let new_chapter: usize = chapter.unwrap_or(previous.2);
@@ -85,8 +85,12 @@ pub fn save_selection(
     Ok(())
 }
 
+fn default_selection() -> (String, usize, usize) {
+    ("schlachter".to_string(), 0, 0)
+}
+
 pub fn turn_chapter(direction: bool, amount: Option<usize>) -> Result<(), Box<dyn Error>> {
-    let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
+    let previous = get_selection().unwrap_or(default_selection());
     let count = get_count(&previous.0, Some(previous.1)).unwrap_or((1, Some(1)));
     let amount = amount.unwrap_or(1);
     let new_selection = if !direction && previous.2 < amount {
@@ -120,7 +124,7 @@ pub fn turn_chapter(direction: bool, amount: Option<usize>) -> Result<(), Box<dy
 }
 
 pub fn turn_book(direction: bool) -> Result<(), Box<dyn Error>> {
-    let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
+    let previous = get_selection().unwrap_or(default_selection());
     let count = get_count(&previous.0, Some(previous.1)).unwrap_or((1, Some(1)));
     let new_book = if !direction && previous.1 <= 0 {
         0
@@ -139,7 +143,7 @@ pub fn turn_book(direction: bool) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn turn_translation(direction: bool) -> Result<(), Box<dyn Error>> {
-    let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
+    let previous = get_selection().unwrap_or(default_selection());
     let translations = get_translation_map().unwrap();
     let index = translations
         .iter()
@@ -153,7 +157,7 @@ pub fn turn_translation(direction: bool) -> Result<(), Box<dyn Error>> {
     .clamp(0, translations.len() - 1);
     let new_translation = translations.get_index(new_index).unwrap().0;
     download_file(new_translation, false)?;
-    let previous = get_selection().unwrap_or(("schlachter".to_string(), 0, 0));
+    let previous = get_selection().unwrap_or(default_selection());
     let count = get_count(new_translation, Some(previous.1)).unwrap_or((1, Some(1)));
     save_selection(
         Some(new_translation),
