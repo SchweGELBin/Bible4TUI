@@ -184,7 +184,7 @@ fn save_index() -> Result<(), Box<dyn Error>> {
 }
 
 fn download_file(abbrev: &str, force: bool) -> Result<(), Box<dyn Error>> {
-    if force || !fs::exists(format!("{}/{}.json", get_data_dir(), &abbrev))? {
+    if force || check_update(abbrev)? {
         let turl = format!("https://api.getbible.net/v2/{}.json", &abbrev);
         let translation = reqwest::blocking::get(turl)?.bytes()?;
         fs::write(format!("{}/{}.json", get_data_dir(), &abbrev), &translation)?;
@@ -199,6 +199,7 @@ fn check_update(abbrev: &str) -> Result<bool, Box<dyn Error>> {
     let checksums = get_checksum(&abbrev, true)?;
     Ok(checksums.0 != checksums.1)
 }
+
 fn get_checksum(translation: &str, index: bool) -> Result<(String, String), Box<dyn Error>> {
     let data_dir = get_data_dir();
     let translation_checksum = sha256::try_digest(format!("{}/{}.json", data_dir, translation))
