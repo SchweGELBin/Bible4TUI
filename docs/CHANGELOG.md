@@ -1,3 +1,16 @@
+## [0.5.1] - 2026-03-09
+
+### 🐛 Bug Fixes
+
+- Automatically verify checksums of translations
+
+### 🚜 Refactor
+
+- Standardize default selection
+
+### 📚 Documentation
+
+- Update todo list
 ## [0.5.0] - 2026-03-07
 
 ### 🚀 Features
@@ -8,6 +21,10 @@
 ### 📚 Documentation
 
 - Add TODO.md
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump to 0.5.0
 ## [0.4.0] - 2026-03-04
 
 ### 🚀 Features
